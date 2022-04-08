@@ -1,0 +1,43 @@
+---
+- name: Alias kubectl command
+  ansible.builtin.command: snap alias microk8s.kubectl kubectl
+  changed_when: false
+
+- name: Update /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "{{ hostvars[item]['ip'] }} {{ item }}.cluster.local {{ item }}"
+  with_items:
+    - "{{ groups['kubernetes_nodes'] }}"
+
+- name: Adding StartupProbe=true (kubelet)
+  ansible.builtin.lineinfile:
+    path: /var/snap/microk8s/current/args/kubelet
+    regexp: "^--feature-gates"
+    line: '--feature-gates="DevicePlugins=true,StartupProbe=true"'
+
+- name: Increase pod limit
+  ansible.builtin.lineinfile:
+    path: /var/snap/microk8s/current/args/kubelet
+    line: "--max-pods=220"
+
+- name: Stop microk8s
+  ansible.builtin.command: microk8s stop
+  retries: 3
+  delay: 5
+  register: result
+  until: result.rc == 0
+  changed_when: false
+
+- name: Start microk8s
+  ansible.builtin.command: microk8s start
+  retries: 3
+  delay: 5
+  register: result
+  until: result.rc == 0
+  changed_when: false
+
+- name: Wait for microk8s
+  ansible.builtin.command: /var/lib/snapd/snap/bin/microk8s.status --wait-ready
+  register: result
+  changed_when: false

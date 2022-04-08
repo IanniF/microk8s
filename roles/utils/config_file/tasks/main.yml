@@ -1,0 +1,22 @@
+---
+- name: Create default Kubernetes config directory
+  ansible.builtin.file:
+    path: $HOME/.kube
+    state: directory
+    mode: 0644
+
+- name: Create Kubernetes config file
+  ansible.builtin.file:
+    state: touch
+    path: $HOME/.kube/config
+    mode: 0644
+
+- name: Get config from microk8s command
+  ansible.builtin.command: microk8s config
+  register: kubeconfig
+  changed_when: false
+
+- name: Add Kubernetes config to file
+  ansible.builtin.blockinfile:
+    path: $HOME/.kube/config
+    block: '{{ kubeconfig.stdout }}'

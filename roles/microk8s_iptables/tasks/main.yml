@@ -1,0 +1,25 @@
+---
+- name: Open required port for microk8s
+  ansible.builtin.iptables:
+    chain: INPUT
+    action: insert
+    rule_num: 1
+    protocol: tcp
+    destination_port: '{{ item }}'
+    jump: ACCEPT
+  with_items:
+    - 16443
+    - 10250
+    - 10255
+    - 25000
+    - 12379
+    - 10257
+    - 10259
+    - 19001
+    - 10248
+    - 10249
+    - 10251
+    - 10252
+    - 10256
+    - 2380
+    - 1338

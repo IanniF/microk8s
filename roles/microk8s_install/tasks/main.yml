@@ -1,0 +1,13 @@
+---
+- name: Install microk8s via snapd
+  ansible.builtin.command: "snap install microk8s --classic --channel={{ microk8s_version }}/stable"
+  register: result
+  retries: 6
+  delay: 10
+  until: result.rc == 0
+  changed_when: '"snap \"microk8s\" is already installed" not in result.stderr'
+
+- name: Wait for microk8s
+  ansible.builtin.command: /var/lib/snapd/snap/bin/microk8s.status --wait-ready
+  register: result
+  changed_when: false

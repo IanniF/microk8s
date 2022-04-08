@@ -1,0 +1,24 @@
+---
+- name: Create namespace for kube-info
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: kube-info
+
+- name: Get Kubernetes version
+  ansible.builtin.command: 'kubectl get node -o jsonpath={.items[0].status.nodeInfo.kubeletVersion}'
+  register: kubernetes_version
+  changed_when: false
+
+- name: Create configmap
+  kubernetes.core.k8s:
+    apply: true
+    kind: ConfigMap
+    name: kubernetes-information
+    namespace: kube-info
+    resource_definition:
+      data:
+        distribution_name: "Microk8s"
+        distribution_version: '"{{ microk8s_version }}"'
+        kubernetes_version: '"{{ kubernetes_version.stdout }}"'

@@ -1,0 +1,16 @@
+---
+- name: Enable dns service
+  ansible.builtin.command: microk8s enable dns
+  retries: 3
+  delay: 5
+  register: result
+  until: result.rc == 0
+  changed_when: '"Addon dns is already enabled" not in result.stdout'
+
+- name: Enable metric server service
+  ansible.builtin.command: microk8s enable metrics-server
+  retries: 3
+  delay: 5
+  register: result
+  until: result.rc == 0
+  changed_when: '"Addon metrics-server is already enabled" not in result.stdout'

@@ -1,0 +1,39 @@
+---
+- hosts: kubernetes_nodes
+  gather_facts: false
+  pre_tasks:
+    - name: Change hostname
+      ansible.builtin.hostname:
+        name: '{{ inventory_hostname }}'
+  roles:
+    - {role: snapd}
+    - {role: microk8s_iptables}
+    - {role: microk8s_install}
+    - {role: utils/config_file}
+    - {role: microk8s_config}
+
+- name: Setup Kubernetes cluster master nodes
+  hosts: kubernetes_nodes_master !kubernetes_nodes[0]
+  serial: 1
+  roles:
+    - {role: microk8s_cluster_creation}
+    - {role: utils/config_file}
+
+- name: Configure Microk8s cluster
+  hosts: kubernetes_nodes
+  gather_facts: false
+  roles:
+    - {role: microk8s_cluster_config}
+  run_once: true
+
+- name: Add labels to master nodes
+  hosts: kubernetes_nodes
+  gather_facts: false
+  roles:
+    - {role: microk8s_label_config}
+
+- hosts: localhost
+  gather_facts: false
+  roles:
+    - {role: utils/fetch_config_file}
+    - {role: microk8s_configmap}

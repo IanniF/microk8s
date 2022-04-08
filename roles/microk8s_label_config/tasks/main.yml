@@ -1,0 +1,18 @@
+---
+- name: Set inventory node label to empty list
+  ansible.builtin.set_fact:
+    inventory_node_labels: []
+
+- name: Populate inventory node label
+  ansible.builtin.set_fact:
+    inventory_node_labels: "{{ inventory_node_labels + [ '%s=%s'|format(item.key, item.value) ] }}"
+  loop: "{{ node_labels|d({})|dict2items }}"
+  when:
+    - node_labels is defined
+    - node_labels is mapping
+
+- name: Set label to node
+  ansible.builtin.command: >-
+    /usr/local/bin/kubectl label node {{ inventory_hostname }} {{ item }} --overwrite=true
+  loop: "{{ inventory_node_labels }}"
+  changed_when: false
