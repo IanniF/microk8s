@@ -1,0 +1,19 @@
+---
+all:
+  hosts:
+    ifo-k8s-sn:
+      ansible_host: 10.129.100.40
+      ip: 10.129.100.40
+      access_ip: 10.129.100.40
+      ansible_user: root
+      node_labels:
+        persistence: true
+        persistence_node_id: 1
+
+  children:
+    kubernetes_nodes:
+      hosts:
+        ifo-k8s-sn:
+    kubernetes_nodes_master:
+      hosts:
+        ifo-k8s-sn:

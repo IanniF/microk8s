@@ -13,6 +13,6 @@
 
 - name: Set label to node
   ansible.builtin.command: >-
-    /usr/local/bin/kubectl label node {{ inventory_hostname }} {{ item }} --overwrite=true
+    kubectl label node {{ inventory_hostname }} {{ item }} --overwrite=true
   loop: "{{ inventory_node_labels }}"
   changed_when: false
